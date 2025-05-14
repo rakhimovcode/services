@@ -25,7 +25,7 @@ export class Master extends Model<Master, IMasterCreationAttr> {
   declare full_name: string;
 
   @Column({
-    type: DataType.STRING(15),
+    type: DataType.STRING,
   })
   declare service: string;
 

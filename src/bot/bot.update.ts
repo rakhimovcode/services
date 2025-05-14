@@ -20,16 +20,20 @@ export class BotUpdate {
   @UseFilters(TelegrafExceptionFilter)
   @UseGuards(AdminGuard)
   @Command("admin")
-  async onAdminCommand(@Ctx() ctx:Context){
-    await this.botService.admin_menu(ctx,`Xush Kelibsiz ADMIN!`)
+  async onAdminCommand(@Ctx() ctx: Context) {
+    await this.botService.admin_menu(ctx, `Xush Kelibsiz ADMIN!`);
   }
   @Start()
   async onStart(@Ctx() ctx: Context) {
     return this.botService.start(ctx);
   }
   @Hears("Register")
-  async OnRegister(ctx:Context){
-    return this.botService.register(ctx)
+  async OnRegister(ctx: Context) {
+    return this.botService.register(ctx);
+  }
+  @Action("update_info")
+  async OnUpdate(ctx:Context){
+    return this.botService.onUpdate(ctx)
   }
   @On("text")
   async onText(@Ctx() ctx: Context) {

@@ -6,17 +6,25 @@ import { Context, Markup, Telegraf } from "telegraf";
 import { Customer } from "./models/customer.model";
 import { Master } from "./models/master.model";
 import { Op } from "sequelize";
+import { MasterService } from "./master/master.service";
 
 @Injectable()
 export class BotService {
   constructor(
     @InjectModel(Customer) private readonly customerModel: typeof Customer,
     @InjectModel(Master) private readonly masterModel: typeof Master,
-    @InjectBot(BOT_NAME) private readonly bot: Telegraf<Context>
+    @InjectBot(BOT_NAME) private readonly bot: Telegraf<Context>,
+    private readonly MasterService: MasterService
   ) {}
 
   async start(ctx: Context) {
     try {
+       const user_id = ctx.from?.id;
+       const master = await this.masterModel.findOne({ where: { user_id } });
+       if(master?.is_verified==true){
+        await this.MasterService.MasterMenu(ctx)
+        return
+       }
       await ctx.replyWithHTML(
         "<b>🔍 ServiceUz ga Xush Kelibsiz 🎉</b>",
         Markup.keyboard([["Register"]])
@@ -139,10 +147,26 @@ export class BotService {
 
           await ctx.replyWithHTML(
             `<b>Siz kiritgan ma'lumotlar! ${message} 
-            Kiritgan ma'lumotlarni tasdiqlaysizmi?</b>`,
+          Kiritgan ma'lumotlarni tasdiqlaysizmi?</b>`,
             Markup.inlineKeyboard([
-              [Markup.button.callback("Tasdiqlash", "confirm_yes")],
-              [Markup.button.callback("Bekor qilish", "confirm_no")],
+              [
+                Markup.button.callback(
+                  "Adminga Tasdiqlash Uchun Yuborish 📩",
+                  "confirm_yes"
+                ),
+              ],
+              [
+                Markup.button.callback(
+                  "Ma'lumotlarini Bekor qilish ❗",
+                  "confirm_no"
+                ),
+              ],
+              [
+                Markup.button.callback(
+                  "Ma'lumotlarini Yangilash 🔄",
+                  "update_info"
+                ),
+              ],
             ])
           );
 
@@ -150,6 +174,62 @@ export class BotService {
       }
     } catch (error) {
       console.error("Error on onText():", error);
+    }
+  }
+
+  async onUpdate(ctx:Context){
+    try {
+      const user_id = ctx.from?.id;
+      const user = await this.masterModel.findOne({ where: { user_id } });
+      if (!user) {
+        await ctx.replyWithHTML(
+          `Iltimos, <b>/start</b> tugmasini bosing!`,
+          Markup.keyboard([["/start"]])
+            .oneTime()
+            .resize()
+        );
+        return;
+      }
+       const workshop = [
+         [
+           {
+             text: "Ism-Familya Yangilash 📛",
+             callback_data: "master_info_1",
+           },
+         ],
+         [
+           {
+             text: "Service Yangilash ⚒",
+             callback_data: "master_info_2",
+           },
+         ],
+         [
+           {
+             text: "Telefon Raqam Yangilash 📞",
+             callback_data: "master_info_3",
+           },
+         ],
+         [
+           {
+             text: "Ish Boshlanish Vaqtini Yangilash ⌚",
+             callback_data: "master_info_4",
+           },
+         ],
+         [
+           {
+             text: "Ish Tugash Vaqtini Yangilash ⌚",
+             callback_data: "master_info_5",
+           },
+         ],
+       ];
+       await ctx.reply("Yangilash Uchun Kerakli Informatsiyani Tanlang ❗", {
+         reply_markup: {
+           inline_keyboard: workshop,
+         },
+       });
+
+    } catch (error) {
+      console.log("Error while updating Master Information");
     }
   }
   async OnContact(ctx: Context) {

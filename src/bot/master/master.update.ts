@@ -15,24 +15,29 @@ export class MasterUpdate {
     return this.masterService.create(ctx);
   }
 
-  @Hears("soatsoz")
-  async onSoatsoz(@Ctx() ctx: Context) {
-    return this.masterService.fillInfo(ctx, "soatsoz");
-  }
-
-  @Hears("sartaroshxona")
+  @Action("master_1")
   async onSartaroshxona(@Ctx() ctx: Context) {
-    return this.masterService.fillInfo(ctx, "sartaroshxona");
+    return this.masterService.fillInfo(ctx, "Sartaroshxona");
   }
 
-  @Hears("tamirlash")
-  async onTamirlash(@Ctx() ctx: Context) {
-    return this.masterService.fillInfo(ctx, "tamirlash");
-  }
-
-  @Hears("salon")
+  @Action("master_2")
   async onSaloon(@Ctx() ctx: Context) {
-    return this.masterService.fillInfo(ctx, "salon");
+    return this.masterService.fillInfo(ctx, "Go'zallik saloni");
+  }
+
+  @Action("master_3")
+  async onZargarlik(@Ctx() ctx: Context) {
+    return this.masterService.fillInfo(ctx, "Zargarlik Ustaxonasi");
+  }
+
+  @Action("master_4")
+  async onSoatsoz(@Ctx() ctx: Context) {
+    return this.masterService.fillInfo(ctx, "Soatsoz");
+  }
+
+  @Action("master_5")
+  async onPoyabzalUstasi(@Ctx() ctx: Context) {
+    return this.masterService.fillInfo(ctx, "Poyabzal Ustaxonasi");
   }
 
   @On("location")
@@ -43,6 +48,11 @@ export class MasterUpdate {
   @Action("confirm_no")
   async confirmNo(@Ctx() ctx: Context) {
     return this.masterService.confirmNo(ctx);
+  }
+
+  @Action("is_verified_master")
+  async isVerfifiedMaster(@Ctx() ctx: Context) {
+    return this.masterService.isVerified(ctx);
   }
 
   @Action("confirm_yes")
@@ -56,6 +66,6 @@ export class MasterUpdate {
   }
   @Action(/^reject_master_+\d/)
   async onRejectMaster(@Ctx() ctx: Context) {
-    await this.masterService.OnRejection(ctx)
+    await this.masterService.OnRejection(ctx);
   }
 }
