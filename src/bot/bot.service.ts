@@ -18,14 +18,40 @@ export class BotService {
   async start(ctx: Context) {
     try {
       await ctx.replyWithHTML(
-        "<b>🔍 ServiceUz ga Xush Kelibsiz 🎉 Tanlang:</b>",
-        Markup.keyboard([["Usta", "Mijoz"]])
+        "<b>🔍 ServiceUz ga Xush Kelibsiz 🎉</b>",
+        Markup.keyboard([["Register"]])
           .resize()
           .oneTime()
       );
     } catch (error) {
       console.error("Error in start:", error);
-      await ctx.reply("Xatolik yuz berdi, qayta urinib ko‘ring.");
+      await ctx.reply("Xatolik yuz berdi, qayta urinib ko'ring.");
+    }
+  }
+
+  async register(ctx: Context) {
+    try {
+       await ctx.replyWithHTML(
+         "<b>🔍Tanlang:</b>",
+         Markup.keyboard([["Usta", "Mijoz"]])
+           .resize()
+           .oneTime()
+       );
+    } catch (error) {
+      console.error("Error in start:", error);
+      await ctx.reply("Xatolik yuz berdi, qayta urinib ko'ring.");
+    }
+  }
+  async admin_menu(ctx:Context, message:string){
+    try {
+      await ctx.reply(message,{
+        parse_mode: "HTML",
+        ...Markup.keyboard([["Ustalar", "Mijozlar"]])
+        .oneTime()
+        .resize()
+      })
+    } catch (error) {
+      console.log("Admin menusida xatolik!",error);
     }
   }
   async onText(ctx: Context) {
@@ -45,6 +71,12 @@ export class BotService {
 
       if (!master) return;
 
+      const customer = await this.customerModel.findOne({
+        where: { user_id, last_state: { [Op.ne]: "finish" } },
+      });
+
+
+  
       switch (master.last_state) {
         case "full_name":
           master.full_name = userInput;
@@ -66,7 +98,6 @@ export class BotService {
           await master.save();
           await ctx.reply("Ish boshlash vaqtingizni kiriting");
           break;
-
         case "start_time":
           master.start_time = userInput;
           master.last_state = "end_time";
@@ -89,6 +120,33 @@ export class BotService {
               .resize(),
           });
           break;
+        case "service_duration":
+          master.service_duration = userInput;
+          master.last_state = "finish";
+          await master.save();
+          const message = `👤 Usta Info:
+🆔 ID: ${master.user_id}
+📛 Name: ${master.full_name}
+📱 Phone: ${master.phone_number}
+✅ Service: ${master.service}
+⏲ Start Time: ${master.start_time}
+⏲ End Time: ${master.end_time}
+🏠 Location: ${master.location || "Not Provided"}
+⏳ Service Duration: ${master.service_duration}`;
+          await ctx.replyWithHTML("Ma'lumotlaringiz:", {
+            reply_markup: { remove_keyboard: true },
+          });
+
+          await ctx.replyWithHTML(
+            `<b>Siz kiritgan ma'lumotlar! ${message} 
+            Kiritgan ma'lumotlarni tasdiqlaysizmi?</b>`,
+            Markup.inlineKeyboard([
+              [Markup.button.callback("Tasdiqlash", "confirm_yes")],
+              [Markup.button.callback("Bekor qilish", "confirm_no")],
+            ])
+          );
+
+          break;
       }
     } catch (error) {
       console.error("Error on onText():", error);
@@ -98,8 +156,6 @@ export class BotService {
     try {
       const user_id = ctx.from?.id;
       const user = await this.masterModel.findOne({ where: { user_id } });
-      console.log(user);
-
       if (!user) {
         await ctx.replyWithHTML(
           `Iltimos, <b>/start</b> tugmasini bosing!`,

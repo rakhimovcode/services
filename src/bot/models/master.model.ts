@@ -8,6 +8,7 @@ interface IMasterCreationAttr {
   start_time: string;
   end_time: string;
   last_state: string;
+  service_duration:string
 }
 
 @Table({ tableName: "master" })
@@ -54,6 +55,11 @@ export class Master extends Model<Master, IMasterCreationAttr> {
     defaultValue: false,
   })
   declare is_verified: boolean;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  declare service_duration: string;
 
   @Column({
     type: DataType.STRING(50),

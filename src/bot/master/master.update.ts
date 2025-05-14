@@ -1,10 +1,14 @@
-import { Hears, On, Update, Ctx, Action } from "nestjs-telegraf";
+import { Hears, On, Update, Ctx, Action, Command } from "nestjs-telegraf";
 import { Context } from "telegraf";
 import { MasterService } from "./master.service";
+import { BotService } from "../bot.service";
 
 @Update()
 export class MasterUpdate {
-  constructor(private readonly masterService: MasterService) {}
+  constructor(
+    private readonly masterService: MasterService,
+    private readonly botService: BotService
+  ) {}
 
   @Hears("Usta")
   async onUsta(@Ctx() ctx: Context) {
@@ -40,9 +44,18 @@ export class MasterUpdate {
   async confirmNo(@Ctx() ctx: Context) {
     return this.masterService.confirmNo(ctx);
   }
-  
+
   @Action("confirm_yes")
   async confirmYes(@Ctx() ctx: Context) {
     return this.masterService.confirmYes(ctx);
+  }
+
+  @Action(/^confirm_master_+\d/)
+  async onConfirmMaster(@Ctx() ctx: Context) {
+    await this.masterService.onConfirmMaster(ctx);
+  }
+  @Action(/^reject_master_+\d/)
+  async onRejectMaster(@Ctx() ctx: Context) {
+    await this.masterService.OnRejection(ctx)
   }
 }

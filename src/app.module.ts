@@ -29,7 +29,7 @@ import { Services } from './bot/models/service.model';
       sync: { alter: true },
       logging: false,
     }),
-    BotModule
+    BotModule,
    
   ],
   controllers: [],
